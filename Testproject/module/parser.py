@@ -1,31 +1,38 @@
 #from calendar import c
 import requests
 from bs4 import BeautifulSoup
+Bs4Tag = BeautifulSoup.element.Tag
+
 class Ingredient:
         def __init__(self, name, amount=None, unit=None, note=None):
-                self.name = name
-                self.amount = amount
-                self.unit = unit
-                self.note = note
+                self.name = name.text
+                if amount:
+                        self.amount = amount.text
+                else:
+                        self.amount = None
+                if unit:
+                        self.unit = unit.text
+                else:
+                        self.unit = None
+                if note:
+                        self.note = note.text
+                else:
+                        self.note = None
 
         def __str__(self):
                 result = self.name
                 if self.amount and self.unit:
-                        result = f'{result} - {self.amount}{self.unit}' 
+                        result = f'{self.amount} {self.unit} - {result}' 
+                elif not self.amount and self.unit:
+                        result = f'{result} - {self.unit}'
+                elif self.amount and not self.unit:
+                        result = f'{self.amount} - {result}'   
                 if self.note:
                         result = f'{result} - {self.note}'  
                 return result 
-                #if not self.note:
-                #        return f'{self.name} - {self.amount}{self.unit}'
-                #else:
-                #        return f'{self.name} - {self.amount}{self.unit} - {self.note}'   
 
-                                #for ingredient_amount in ingredient.find('span', {'class': 'wprm-recipe-ingredient-amount'}):
-                                #        print(ingredient_amount.text)
-                                #for ingredient_unit in ingredient.find('span', {'class': 'wprm-recipe-ingredient-unit'}):
-                                #        print(ingredient_unit.text)
-                                #ingredient_name in ingredient.find('span', {'class': 'wprm-recipe-ingredient-name'}):
-                                #        print(ingredient_name.text)
+#def ZapankaTagToIngredient(name:Bs4Tag, amount:Bs4Tag=None, unit:Bs4Tag=None, note:Bs4Tag=None ) -> Ingredient:
+#        return None   
 
 
 allIngredients = list(())
@@ -46,21 +53,15 @@ for countGroup, divtag in enumerate(soup.find_all('div', {'class': 'wprm-recipe-
                         print (f'               Ingredient #{ingreCount}:')
                         #read only the correct unitsystem
                         ingredient_name = litag.find('span', {'class': 'wprm-recipe-ingredient-name'})
+                        print(type(ingredient_name))
                         ingredient_note = litag.find('span', {'class': 'wprm-recipe-ingredient-notes'})
                         for ingredient in litag.find_all('span', {'class': 'wprm-recipe-ingredient-unit-system-1'}):
                                 ingredient_amount = ingredient.find('span', {'class': 'wprm-recipe-ingredient-amount'})
                                 ingredient_unit = ingredient.find('span', {'class': 'wprm-recipe-ingredient-unit'})
                         if not ingredient_name:
-                                print("damaged Item !")
+                                print("damaged Item, skipping...")
                                 continue;
-                        if not ingredient_amount and not ingredient_unit and not ingredient_note:
-                                allIngredients.append( Ingredient(ingredient_name.text))
-                        if ingredient_amount and not ingredient_unit and not ingredient_note:
-                                allIngredients.append( Ingredient(ingredient_name.text,  ingredient_amount.text))
-                        if ingredient_amount and ingredient_unit and ingredient_note:
-                                allIngredients.append( Ingredient(ingredient_name.text, ingredient_amount.text, ingredient_unit.text, ingredient_note.text))
-                        if ingredient_amount and ingredient_unit and not ingredient_note:
-                                allIngredients.append( Ingredient(ingredient_name.text, ingredient_amount.text, ingredient_unit.text))
+                        allIngredients.append( Ingredient(ingredient_name, ingredient_amount, ingredient_unit, ingredient_note))
 print("Finshed parsing")
 for e in allIngredients:
         print(e)
