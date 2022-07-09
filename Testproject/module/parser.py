@@ -42,18 +42,22 @@ page = requests.get(URL)
 soup = BeautifulSoup(page.content, "html.parser")
 #ZapankaParser
 
+recipeNameElement = soup.find('h2', {'class': 'wprm-recipe-name'})
+print(f'Recipe: {recipeNameElement.text}')
+
+servingsElement = soup.find('span', {'class': 'wprm-recipe-servings-with-unit'})
+print(f'Ingredients for {servingsElement.text}')
+
 #Skip to recipe block directly
-for countGroup, divtag in enumerate(soup.find_all('div', {'class': 'wprm-recipe-ingredient-group'})):
-        #print (f'Group #{countGroup}:')
+for divtag in soup.find_all('div', {'class': 'wprm-recipe-ingredient-group'}):
         #every "component" of the dish
-        for subGroup, ultag in enumerate(divtag.find_all('ul', {'class': 'wprm-recipe-ingredients'})):
-                #print (f'       SubGroup #{subGroup}:')
+        for ultag in divtag.find_all('ul', {'class': 'wprm-recipe-ingredients'}):
                 #one ingredient
-                for ingreCount, litag in enumerate(ultag.find_all('li', {'class': 'wprm-recipe-ingredient'})):
-                        #print (f'               Ingredient #{ingreCount}:')
-                        #read only the correct unitsystem
+                for litag in ultag.find_all('li', {'class': 'wprm-recipe-ingredient'}):
                         ingredient_name = litag.find('span', {'class': 'wprm-recipe-ingredient-name'})
                         ingredient_note = litag.find('span', {'class': 'wprm-recipe-ingredient-notes'})
+
+                        #read only the correct unitsystem
                         for ingredient in litag.find_all('span', {'class': 'wprm-recipe-ingredient-unit-system-1'}):
                                 ingredient_amount = ingredient.find('span', {'class': 'wprm-recipe-ingredient-amount'})
                                 ingredient_unit = ingredient.find('span', {'class': 'wprm-recipe-ingredient-unit'})
@@ -61,6 +65,6 @@ for countGroup, divtag in enumerate(soup.find_all('div', {'class': 'wprm-recipe-
                                 print("damaged Item, skipping...")
                                 continue;
                         allIngredients.append( Ingredient(ingredient_name, ingredient_amount, ingredient_unit, ingredient_note))
-print("Finished parsing")
+
 for e in allIngredients:
         print(e)
