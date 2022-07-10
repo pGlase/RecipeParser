@@ -1,4 +1,4 @@
-#from calendar import c
+from dataclasses import dataclass
 import requests
 from bs4 import BeautifulSoup
 import sys
@@ -31,7 +31,13 @@ class Ingredient:
                         result = f'{result} - {self.note}'  
                 return result
 
-allIngredients = list(())
+@dataclass
+class Recipe:
+        name:str
+        servingsInfo:str
+        ingredients:list[Ingredient]
+
+
 
 if len(sys.argv) < 2:
         print("needs an URL to work")
@@ -42,11 +48,14 @@ page = requests.get(URL)
 soup = BeautifulSoup(page.content, "html.parser")
 #ZapankaParser
 
+#Parse metadata
 recipeNameElement = soup.find('h2', {'class': 'wprm-recipe-name'})
-print(f'Recipe: {recipeNameElement.text}')
+recipeName = f'Recipe: {recipeNameElement.text}'
 
 servingsElement = soup.find('span', {'class': 'wprm-recipe-servings-with-unit'})
-print(f'Ingredients for {servingsElement.text}')
+recipeServingsInfo = f'Ingredients for {servingsElement.text}'
+
+recipe = Recipe(recipeName,recipeServingsInfo,list(()))
 
 #Skip to recipe block directly
 for divtag in soup.find_all('div', {'class': 'wprm-recipe-ingredient-group'}):
@@ -64,7 +73,6 @@ for divtag in soup.find_all('div', {'class': 'wprm-recipe-ingredient-group'}):
                         if not ingredient_name:
                                 print("damaged Item, skipping...")
                                 continue;
-                        allIngredients.append( Ingredient(ingredient_name, ingredient_amount, ingredient_unit, ingredient_note))
-
-for e in allIngredients:
+                        recipe.ingredients.append( Ingredient(ingredient_name, ingredient_amount, ingredient_unit, ingredient_note))
+for e in recipe.ingredients:
         print(e)
