@@ -3,16 +3,16 @@ from bs4 import Tag as HtmlTag
 import requests
 from datatypes import Recipe, Ingredient
 
-def getValueOrEmpty(tag:HtmlTag) -> str:
+def _getValueOrEmpty(tag:HtmlTag) -> str:
         if not tag:
                 return ''
         else:
                 return tag.text
 
-def makeIngredientFromHtmlTags(nameTag:HtmlTag, amountTag:HtmlTag=None, unitTag:HtmlTag=None, noteTag:HtmlTag=None) -> Ingredient:
-        amount:str = getValueOrEmpty(amountTag)
-        unit:str = getValueOrEmpty(unitTag)
-        note:str = getValueOrEmpty(noteTag)
+def _makeIngredientFromHtmlTags(nameTag:HtmlTag, amountTag:HtmlTag=None, unitTag:HtmlTag=None, noteTag:HtmlTag=None) -> Ingredient:
+        amount:str = _getValueOrEmpty(amountTag)
+        unit:str = _getValueOrEmpty(unitTag)
+        note:str = _getValueOrEmpty(noteTag)
         return Ingredient(nameTag.text, unit, amount, note)
 
 def ParseHtmlPage(page: requests.Response) -> Recipe:
@@ -43,6 +43,6 @@ def ParseHtmlPage(page: requests.Response) -> Recipe:
                                     print("damaged Item, skipping...")
                                     continue
 
-                            ingredients.append(makeIngredientFromHtmlTags(ingredient_name, ingredient_amount, ingredient_unit, ingredient_note))
+                            ingredients.append(_makeIngredientFromHtmlTags(ingredient_name, ingredient_amount, ingredient_unit, ingredient_note))
                             
     return Recipe(recipeName,recipeServingsInfo,ingredients)
