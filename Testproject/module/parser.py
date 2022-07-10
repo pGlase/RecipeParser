@@ -1,43 +1,45 @@
 from dataclasses import dataclass
 import requests
 from bs4 import BeautifulSoup
+from bs4 import Tag as HtmlTag
 import sys
 
+@dataclass
 class Ingredient:
-        def __init__(self, name, amount=None, unit=None, note=None):
-                self.name = name.text
-                if amount:
-                        self.amount = amount.text
-                else:
-                        self.amount = None
-                if unit:
-                        self.unit = unit.text
-                else:
-                        self.unit = None
-                if note:
-                        self.note = note.text
-                else:
-                        self.note = None
+        name:str
+        unit:str
+        quantity:str
+        note:str
 
-        def __str__(self):
-                result = f'{self.name}' 
-                if self.amount and self.unit:
-                        result = f'{self.amount} {self.unit} - {self.name}' 
-                elif not self.amount and self.unit:
-                        result = f'{self.name} - {self.unit}'
-                elif self.amount and not self.unit:
-                        result = f'{self.amount} - {self.name}'   
+        #@getDescription 
+        def getDescription(self) -> str:
+                result = ""
+                if self.quantity:
+                        result = f'{self.quantity} '
+                if self.unit:
+                        result = f'{result}{self.unit}\t'
+                result = f'{result}{self.name}'
                 if self.note:
-                        result = f'{result} - {self.note}'  
+                        result = ''.join(f'{result} - {self.note}')
                 return result
+
+def getValueOrEmpty(tag:HtmlTag) -> str:
+        if not tag:
+                return ''
+        else:
+                return tag.text
+
+def makeIngredientFromHtmlTags(nameTag:HtmlTag, amountTag:HtmlTag=None, unitTag:HtmlTag=None, noteTag:HtmlTag=None) -> Ingredient:
+        amount:str = getValueOrEmpty(amountTag)
+        unit:str = getValueOrEmpty(unitTag)
+        note:str = getValueOrEmpty(noteTag)
+        return Ingredient(nameTag.text, unit, amount, note)
 
 @dataclass
 class Recipe:
         name:str
         servingsInfo:str
         ingredients:list[Ingredient]
-
-
 
 if len(sys.argv) < 2:
         print("needs an URL to work")
@@ -65,7 +67,6 @@ for divtag in soup.find_all('div', {'class': 'wprm-recipe-ingredient-group'}):
                 for litag in ultag.find_all('li', {'class': 'wprm-recipe-ingredient'}):
                         ingredient_name = litag.find('span', {'class': 'wprm-recipe-ingredient-name'})
                         ingredient_note = litag.find('span', {'class': 'wprm-recipe-ingredient-notes'})
-
                         #read only the correct unitsystem
                         for ingredient in litag.find_all('span', {'class': 'wprm-recipe-ingredient-unit-system-1'}):
                                 ingredient_amount = ingredient.find('span', {'class': 'wprm-recipe-ingredient-amount'})
@@ -73,6 +74,6 @@ for divtag in soup.find_all('div', {'class': 'wprm-recipe-ingredient-group'}):
                         if not ingredient_name:
                                 print("damaged Item, skipping...")
                                 continue;
-                        recipe.ingredients.append( Ingredient(ingredient_name, ingredient_amount, ingredient_unit, ingredient_note))
+                        recipe.ingredients.append(makeIngredientFromHtmlTags(ingredient_name, ingredient_amount, ingredient_unit, ingredient_note))
 for e in recipe.ingredients:
-        print(e)
+        print(e.getDescription())
