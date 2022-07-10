@@ -41,6 +41,18 @@ class Recipe:
         servingsInfo:str
         ingredients:list[Ingredient]
 
+        #@getName
+        def getName(self) -> str:
+                return self.name
+
+        #@getServingsize
+        def getServingsize(self) -> str:
+                return self.servingsInfo
+
+        #@getAllIngredientDescriptions
+        def getAllIngredientDescriptions(self) -> str:
+                return list(map(lambda x:x.getDescription(), self.ingredients))
+
 if len(sys.argv) < 2:
         print("needs an URL to work")
         exit(-1)
@@ -57,8 +69,8 @@ recipeName = f'Recipe: {recipeNameElement.text}'
 servingsElement = soup.find('span', {'class': 'wprm-recipe-servings-with-unit'})
 recipeServingsInfo = f'Ingredients for {servingsElement.text}'
 
-recipe = Recipe(recipeName,recipeServingsInfo,list(()))
 
+ingredients = list(())
 #Skip to recipe block directly
 for divtag in soup.find_all('div', {'class': 'wprm-recipe-ingredient-group'}):
         #every "component" of the dish
@@ -73,7 +85,14 @@ for divtag in soup.find_all('div', {'class': 'wprm-recipe-ingredient-group'}):
                                 ingredient_unit = ingredient.find('span', {'class': 'wprm-recipe-ingredient-unit'})
                         if not ingredient_name:
                                 print("damaged Item, skipping...")
-                                continue;
-                        recipe.ingredients.append(makeIngredientFromHtmlTags(ingredient_name, ingredient_amount, ingredient_unit, ingredient_note))
-for e in recipe.ingredients:
-        print(e.getDescription())
+                                continue
+
+                        ingredients.append(makeIngredientFromHtmlTags(ingredient_name, ingredient_amount, ingredient_unit, ingredient_note))
+                        
+recipe = Recipe(recipeName,recipeServingsInfo,ingredients)
+
+print("Finished parsing\n")
+print(recipe.getName())
+print(recipe.getServingsize())
+for e in recipe.getAllIngredientDescriptions():
+        print(e)
