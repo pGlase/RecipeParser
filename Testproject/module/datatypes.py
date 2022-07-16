@@ -7,7 +7,6 @@ class Ingredient:
         quantity:str
         note:str
 
-        #@getDescription 
         def getDescription(self) -> str:
                 result = ""
                 if self.quantity:
@@ -25,14 +24,12 @@ class Recipe:
         servingsInfo:str
         ingredients:list[Ingredient]
 
-        #@getName
+
         def getName(self) -> str:
                 return self.name
 
-        #@getServingsize
         def getServingsize(self) -> str:
                 return self.servingsInfo
 
-        #@getAllIngredientDescriptions
         def getAllIngredientDescriptions(self) -> str:
                 return list(map(lambda x:x.getDescription(), self.ingredients))
