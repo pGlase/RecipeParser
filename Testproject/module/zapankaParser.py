@@ -1,8 +1,9 @@
 from bs4 import BeautifulSoup
 from bs4 import Tag as HtmlTag
 from datatypes import Recipe, Ingredient
+from recipeParser import RecipeParser
 
-class ZapankaParser():
+class ZapankaParser(RecipeParser):
 
         @classmethod
         def _get_value_or_empty(cls, tag:HtmlTag) -> str:
@@ -21,6 +22,7 @@ class ZapankaParser():
         @classmethod
         def parse_html_page(cls, pageContent: bytes) -> Recipe:
                 soup = BeautifulSoup(pageContent, "html.parser")
+
                 #Parse metadata
                 recipeNameElement = soup.find('h2', {'class': 'wprm-recipe-name'})
                 recipeName = f'Recipe: {recipeNameElement.text}'

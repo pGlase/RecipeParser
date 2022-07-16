@@ -1,5 +1,6 @@
 import requests
 import sys
+from recipeParser import RecipeParser
 from datatypes import Recipe, Ingredient
 import zapankaParser as zapankaParser
 
@@ -9,7 +10,7 @@ if len(sys.argv) < 2:
 url = str(sys.argv[1]);
 
 pageContents = requests.get(url).content
-parser = zapankaParser.ZapankaParser()
+parser:RecipeParser = zapankaParser.ZapankaParser()
 recipe = parser.parse_html_page(pageContents)
 
 print(recipe.getName())
